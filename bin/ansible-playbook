@@ -1,0 +1,58 @@
+#!/bin/bash
+
+logfile_count=0
+tmpdir_count=0
+
+start_date=$(date +%s)
+
+logpath="$HOME/log/$(date -d @$start_date +%Y.%m.%d_%H.%M)"
+tmpdir="$HOME/.tmpdir/$(date -d @$start_date +%Y.%m.%d_%H.%M)"
+_logpath="$logpath"
+_tmpdir="$tmpdir"
+
+while [ -f $logpath ]
+  do
+    logpath=${_logpath}.$((logfile_count++))
+done
+
+while [ -e $tmpdir ]
+  do
+    tmpdir=${_tmpdir}.$((tmpdir_count++))
+done
+
+mkdir $tmpdir
+
+export ANSIBLE_LOG_PATH=$logpath
+export ANSIBLE_TMPDIR=$tmpdir
+
+echo -e "\e[31mLog for this job in $ANSIBLE_LOG_PATH\e[0m"
+echo -e "\e[31mTmpdir for this job is $ANSIBLE_TMPDIR\e[0m"
+
+arguments="$@"
+
+echo "$arguments"
+
+id=$(sqlite3 ~/ansible.db "begin transaction; insert into tasks ('start', 'logname') values (\"$start_date\" ,\"$ANSIBLE_LOG_PATH\"); select last_insert_rowid(); commit;")
+
+export ANSIBLE_TASK_ID="$id"
+
+
+~/ansible/bin/ansible-playbook $arguments
+
+ansible_rc="$?"
+
+stop_date=$(date +%s)
+
+sqlite3 ~/ansible.db "begin transaction; update tasks set 'rc' = coalesce(rc, \"$ansible_rc\"), 'stop' = \"$stop_date\" where id = $id; commit;"
+
+if [ -e "${tmpdir}/do_not_remove" ]
+  then
+    cp ${ANSIBLE_LOG_PATH} ${ANSIBLE_LOG_PATH}.html ${tmpdir}/
+    echo -e "\e[31mLog files are copied to ${tmpdir}\e[0m"
+  else
+    echo -e "\t\e[31mClearing the temporary directory...\e[0m"
+    rm -rv ${tmpdir}
+    echo -e "\t\e[31mOK\e[0m"
+fi
+
+exit $ansible_rc
