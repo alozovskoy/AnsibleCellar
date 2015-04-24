@@ -30,8 +30,6 @@ echo -e "\e[31mTmpdir for this job is $ANSIBLE_TMPDIR\e[0m"
 
 arguments="$@"
 
-echo "$arguments"
-
 id=$(sqlite3 ~/ansible.db "begin transaction; insert into tasks ('start', 'logname') values (\"$start_date\" ,\"$ANSIBLE_LOG_PATH\"); select last_insert_rowid(); commit;")
 
 export ANSIBLE_TASK_ID="$id"
