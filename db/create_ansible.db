@@ -1,0 +1,26 @@
+BEGIN TRANSACTION;
+CREATE TABLE "tasks" (
+	`id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	`rc`	INTEGER,
+	`start`	INTEGER,
+	`stop`	INTEGER,
+	`logname`	TEXT,
+	`ppid`	INTEGER,
+	`playbook`	TEXT,
+	`inventory`	TEXT,
+	`vars`	TEXT,
+	`type`	INTEGER,
+	`owner`	TEXT,
+	`statuscode`	INTEGER
+);
+CREATE TABLE `steps` (
+	`id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	`taskid`	INTEGER NOT NULL,
+	`step`	INTEGER NOT NULL,
+	`hostname`	TEXT,
+	`data`	INTEGER,
+	`status`	INTEGER,
+	`start`	INTEGER,
+	`stop`	INTEGER
+);
+COMMIT;
