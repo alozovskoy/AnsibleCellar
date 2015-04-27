@@ -28,8 +28,6 @@ export ANSIBLE_TMPDIR=$tmpdir
 echo -e "\e[31mLog for this job in $ANSIBLE_LOG_PATH\e[0m"
 echo -e "\e[31mTmpdir for this job is $ANSIBLE_TMPDIR\e[0m"
 
-arguments="$@"
-
 if [[ -z "$ANSIBLE_OWNER" ]]
     then
         ANSIBLE_OWNER='sys'
@@ -39,7 +37,7 @@ id=$(sqlite3 ~/ansible.db "begin transaction; insert into tasks ('start', 'logna
 
 export ANSIBLE_TASK_ID="$id"
 
-~/ansible/bin/ansible-playbook $arguments
+~/ansible/bin/ansible-playbook "$@"
 
 ansible_rc="$?"
 
