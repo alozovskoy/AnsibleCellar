@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export ANSIBLE_HOME='/home/ansible'
+
 logfile_count=0
 tmpdir_count=0
 
@@ -11,13 +13,13 @@ _logpath="$logpath"
 _tmpdir="$tmpdir"
 
 while [ -f $logpath ]
-    do
-        logpath=${_logpath}.$((logfile_count++))
+  do
+    logpath=${_logpath}.$((logfile_count++))
 done
 
 while [ -e $tmpdir ]
-    do
-        tmpdir=${_tmpdir}.$((tmpdir_count++))
+  do
+    tmpdir=${_tmpdir}.$((tmpdir_count++))
 done
 
 mkdir $tmpdir
@@ -29,13 +31,14 @@ echo -e "\e[31mLog for this job in $ANSIBLE_LOG_PATH\e[0m"
 echo -e "\e[31mTmpdir for this job is $ANSIBLE_TMPDIR\e[0m"
 
 if [[ -z "$ANSIBLE_OWNER" ]]
-    then
-        ANSIBLE_OWNER='sys'
+  then
+    ANSIBLE_OWNER='sys'
 fi
 
-id=$(sqlite3 ~/ansible.db "begin transaction; insert into tasks ('start', 'logname', 'type', 'owner') values (\"$start_date\" ,\"$ANSIBLE_LOG_PATH\", \"playbook\", \"$ANSIBLE_OWNER\"); select last_insert_rowid(); commit;")
+id=$(sqlite3 -cmd ".timeout 5000" ~/ansible.db "begin transaction; insert into tasks ('start', 'logname', 'type', 'owner') values (\"$start_date\" ,\"${ANSIBLE_LOG_PATH#$ANSIBLE_HOME}\", \"playbook\", \"$ANSIBLE_OWNER\"); select last_insert_rowid(); commit;")
 
 export ANSIBLE_TASK_ID="$id"
+
 
 ~/ansible/bin/ansible-playbook "$@"
 
@@ -43,16 +46,16 @@ ansible_rc="$?"
 
 stop_date=$(date +%s)
 
-sqlite3 ~/ansible.db "begin transaction; update tasks set 'rc' = coalesce(rc, \"$ansible_rc\"), 'stop' = \"$stop_date\" where id = $id; commit;"
+sqlite3 -cmd ".timeout 5000" ~/ansible.db "begin transaction; update tasks set 'rc' = \"$ansible_rc\", 'stop' = \"$stop_date\" where id = $id; commit;"
 
 if [ -e "${tmpdir}/do_not_remove" ]
-    then
-        cp ${ANSIBLE_LOG_PATH} ${ANSIBLE_LOG_PATH}.html ${tmpdir}/
-        echo -e "\e[31mLog files are copied to ${tmpdir}\e[0m"
-    else
-        echo -e "\t\e[31mClearing the temporary directory...\e[0m"
-        rm -rfv ${tmpdir}
-        echo -e "\t\e[31mOK\e[0m"
+  then
+    cp ${ANSIBLE_LOG_PATH} ${ANSIBLE_LOG_PATH}.html ${tmpdir}/
+    echo -e "\e[31mLog files are copied to ${tmpdir}\e[0m"
+  else
+    echo -e "\t\e[31mClearing the temporary directory...\e[0m"
+    rm -rv ${tmpdir}
+    echo -e "\t\e[31mOK\e[0m"
 fi
 
 exit $ansible_rc
