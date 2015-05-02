@@ -1,0 +1,4 @@
+{% extends "main" %}
+{% block header %}<h2>HTTP 404</h2>{% end %}
+{% block content%}К сожалению, страницы {{page}} у нас нет.{% end %}
+

@@ -1,0 +1,28 @@
+{% extends "main" %}
+{% block header %}<h2>INVENTORIES</h2>{% end %}
+{% block content %}
+<table class="table table-bordered table-condensed">
+    <thead>
+        <tr>
+            <th>Сценарий</th>
+            <th>Описание</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for item in xrange(len(files)) %}
+
+
+        {% set bgcolor = "transparent" %}
+        {% set tclass = '' %}
+        <tr {% if item % 2 == 0 %}{% set bgcolor = "#f2f2f2" %}{% end %} bgcolor="{{bgcolor}}" style="cursor:pointer" onMouseOver="this.style.background='#FFCC33'" onMouseOut="this.style.background='{{bgcolor}}'" onClick="document.location='/playbook{{'/'.join(files[item])}}'">
+
+            <td>{% if files[item][0] %}{{files[item][0]}}/{% end %}<font color="red">{{files[item][1]}}</font></td>
+
+            <td>{{item}}</td>
+        </tr>
+
+    {% end %}
+</tbody>
+</table>
+{% end %}
+

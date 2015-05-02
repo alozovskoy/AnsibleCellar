@@ -1,0 +1,6 @@
+{% extends "main" %}
+{% block header %}<h2>AnsibleCellar</h2>{% end %}
+{% block content %}
+
+{% end %}
+

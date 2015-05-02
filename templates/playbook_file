@@ -1,0 +1,33 @@
+{% extends "main" %}
+{% block header %}<h2>INVENTORIES</h2>{% end %}
+{% block content %}
+{% for tag in tags %}
+{% if tag != 'notags' %}
+<div class="checkbox">
+    <label>
+              <input type="checkbox"> {{tag}}
+                      </label>
+                        </div>
+
+{% end %}
+{% end %}
+<table class="table table-bordered table-condensed">
+{% for item in data %}
+<thead><tr><th colspan="2">{% if data[item]['name'] != 'noname' %}{{data[item]['name']}}{% else %}{{item}}{% end %}</th></tr></thead>
+<thead>
+<tr>
+<th> Действие </th>
+<th> Теги </th>
+</tr>
+
+</thead>
+{%for task in data[item]['tasks']%}
+<tr>
+<td>{{task[0]}}</td><td>{% if task[1] != 'notags' %}{{task[1]}}{% end %}</td>
+
+</tr>
+{% end %}
+{% end %}
+</table>
+{% end %}
+

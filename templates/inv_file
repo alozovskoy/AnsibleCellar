@@ -1,0 +1,27 @@
+{% extends "main" %}
+{% block header %}<h2>INVENTORIES</h2>{% end %}
+{% block content %}
+
+{% for item in data %}
+<table class="table table-bordered">
+<tr>
+    <th colspan="2">
+        {{item}}
+    </th>
+    </tr>
+    {% for i in data[item] %}
+    <tr>
+        <td>
+            {{i}}
+        </td>
+        <td>
+        {% for ii in data[item][i]%}
+            {{ii}} = {{data[item][i][ii]}}</br>
+        {% end %}
+        </td>
+    </tr>
+    {% end %}       
+</table></br>
+{% end %}
+{% end %}
+
