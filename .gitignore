@@ -1,3 +1,5 @@
 *.pyc
 static/
 db/*.db
+cellar.conf
+cellar.log
